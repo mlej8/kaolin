@@ -320,7 +320,7 @@ def heterogeneous_mesh_handler_naive_homogenize(vertices, face_vertex_counts, *a
     return (vertices, new_counts, *new_attrs)
 
 
-def import_mesh(file_path, scene_path=None, time=None):
+def import_mesh(file_path, scene_path=None, heterogeneous_mesh_handler=None, time=None):
     r"""Import a single mesh from a USD file in an unbatched representation.
 
     Supports homogeneous meshes (meshes with consistent numbers of vertices per face).
@@ -360,7 +360,11 @@ def import_mesh(file_path, scene_path=None, time=None):
         scene_path = get_root(file_path)
     if time is None:
         time = Usd.TimeCode.Default()
-    meshes_list = import_meshes(file_path, [scene_path], times=[time])
+    if heterogeneous_mesh_handler:
+        meshes_list = import_meshes(file_path, [scene_path],
+                                    heterogeneous_mesh_handler=heterogeneous_mesh_handler, times=[time])
+    else:
+        meshes_list = import_meshes(file_path, [scene_path], times=[time])
     return mesh_return_type(*meshes_list[0])
 
 
@@ -377,8 +381,8 @@ def import_meshes(file_path, scene_paths=None, heterogeneous_mesh_handler=None, 
         file_path (str): Path to usd file (`\*.usd`, `\*.usda`).
         scene_paths (list of str, optional): Scene path(s) within the USD file indicating which primitive(s)
             to import. If None, all prims of type `Mesh` will be imported.
-        heterogeneous_mesh_handler (function, optional): Optional function to handle heterogeneous meshes. The function's
-            input and output must be  ``vertices`` (torch.FloatTensor), ``faces`` (torch.LongTensor),
+        heterogeneous_mesh_handler (function, optional): Optional function to handle heterogeneous meshes.
+            The function's input and output must be  ``vertices`` (torch.FloatTensor), ``faces`` (torch.LongTensor),
             ``uvs`` (torch.FloatTensor), ``face_uvs_idx`` (torch.LongTensor), and ``face_normals`` (torch.FloatTensor).
             If the function returns ``None``, the mesh will be skipped. If no function is specified,
             an error will be raised when attempting to import a heterogeneous mesh.
