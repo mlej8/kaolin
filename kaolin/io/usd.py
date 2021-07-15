@@ -332,6 +332,11 @@ def import_mesh(file_path, scene_path=None, heterogeneous_mesh_handler=None, tim
         file_path (str): Path to usd file (`\*.usd`, `\*.usda`).
         scene_path (str, optional): Scene path within the USD file indicating which primitive to import.
             If not specified, the all meshes in the scene will be imported and flattened into a single mesh.
+        heterogeneous_mesh_handler (function, optional): Optional function to handle heterogeneous meshes.
+            The function's input and output must be  ``vertices`` (torch.FloatTensor), ``faces`` (torch.LongTensor),
+            ``uvs`` (torch.FloatTensor), ``face_uvs_idx`` (torch.LongTensor), and ``face_normals`` (torch.FloatTensor).
+            If the function returns ``None``, the mesh will be skipped. If no function is specified,
+            an error will be raised when attempting to import a heterogeneous mesh.
         time (int, optional): Positive integer indicating the time at which to retrieve parameters.
 
     Returns:
@@ -360,11 +365,8 @@ def import_mesh(file_path, scene_path=None, heterogeneous_mesh_handler=None, tim
         scene_path = get_root(file_path)
     if time is None:
         time = Usd.TimeCode.Default()
-    if heterogeneous_mesh_handler:
-        meshes_list = import_meshes(file_path, [scene_path],
-                                    heterogeneous_mesh_handler=heterogeneous_mesh_handler, times=[time])
-    else:
-        meshes_list = import_meshes(file_path, [scene_path], times=[time])
+    meshes_list = import_meshes(file_path, [scene_path],
+                                heterogeneous_mesh_handler=heterogeneous_mesh_handler, times=[time])
     return mesh_return_type(*meshes_list[0])
 
 
