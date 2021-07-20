@@ -100,7 +100,7 @@ def _get_flattened_mesh_attributes(stage, scene_path, time):
                     # length of mesh_vertex_indices
                     mesh_uv_indices = list(range(len(mesh_uvs)))
                 mesh_uv_indices = torch.tensor(mesh_uv_indices) + cur_first_idx_uvs
-                face_uvs_idx.append(mesh_uv_indices[torch.from_numpy(np.array(mesh_vertex_indices))])
+                face_uvs_idx.append(mesh_uv_indices[torch.from_numpy(np.array(mesh_vertex_indices, dtype=np.int64))])
             elif mesh_uv_interpolation == 'faceVarying':
                 if not mesh_uv_indices:
                     # for faceVarying interpolation, length of mesh_uv_indices should match
