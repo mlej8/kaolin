@@ -84,16 +84,16 @@ def _get_flattened_mesh_attributes(stage, scene_path, time):
             mesh_uv_interpolation = mesh_st.GetInterpolation()
         mesh_face_normals = mesh.GetNormalsAttr().Get(time=time)
         if mesh_vertices:
-            vertices.append(torch.from_numpy(np.array(mesh_vertices)))
+            vertices.append(torch.from_numpy(np.array(mesh_vertices, dtype=np.float32)))
         if mesh_vertex_indices:
-            face_vertex_counts.append(torch.from_numpy(np.array(mesh.GetFaceVertexCountsAttr().Get(time=time))))
-            vertex_indices.append(torch.from_numpy(np.array(mesh_vertex_indices)) + cur_first_idx_faces)
+            face_vertex_counts.append(torch.from_numpy(np.array(mesh.GetFaceVertexCountsAttr().Get(time=time), dtype=np.int64)))
+            vertex_indices.append(torch.from_numpy(np.array(mesh_vertex_indices, dtype=np.int64)) + cur_first_idx_faces)
             if vertices:
                 cur_first_idx_faces += len(vertices[-1])
         if mesh_face_normals:
-            face_normals.append(torch.from_numpy(np.array(mesh_face_normals)))
+            face_normals.append(torch.from_numpy(np.array(mesh_face_normals, dtype=np.float32)))
         if mesh_st and mesh_uvs:
-            uvs.append(torch.from_numpy(np.array(mesh_uvs)))
+            uvs.append(torch.from_numpy(np.array(mesh_uvs, dtype=np.float32)))
             if mesh_uv_interpolation in ['vertex', 'varying']:
                 if not mesh_uv_indices:
                     # for vertex and varying interpolation, length of mesh_uv_indices should match
@@ -106,7 +106,7 @@ def _get_flattened_mesh_attributes(stage, scene_path, time):
                     # for faceVarying interpolation, length of mesh_uv_indices should match
                     # num_faces * face_size
                     mesh_uv_indices = list(range(len(mesh_uvs)))
-                    face_uvs_idx.append(torch.tensor(mesh_uv_indices) + cur_first_idx_uvs)
+                face_uvs_idx.append(torch.tensor(mesh_uv_indices) + cur_first_idx_uvs)
             else:
                 raise NotImplementedError(f'Interpolation type {mesh_uv_interpolation} is '
                                           'not currently supported')
